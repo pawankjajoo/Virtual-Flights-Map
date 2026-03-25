@@ -10,6 +10,7 @@ Virtual Flights Map provides a unified interface for tracking pilots and air tra
 
 ### Real-Time Flight Tracking
 - **Multi-Network Support**: Track flights from VATSIM, IVAO, POSCON, and other compatible networks
+- which means coverage of ALL online players from X-Plane (all editions), Microsoft Flight Simulator (all editions) and P3D Software
 - **Live Aircraft Markers**: See all active pilots with callsigns, positions, and headings
 - **ATC Coverage**: Interactive ATC stations showing active controllers worldwide
 - **Live Statistics**: Real-time pilot and controller counts with connection status
