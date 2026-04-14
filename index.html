@@ -206,11 +206,14 @@
 
   /* ── AIRCRAFT LEGEND PANEL ── */
   .legend-panel{
-    position:absolute;bottom:108px;left:10px;z-index:1500;
+    position:absolute;bottom:108px;left:10px;z-index:1700;
     background:var(--bg3s);border:1px solid var(--bdr);border-radius:14px;
     padding:12px 16px 12px 14px;backdrop-filter:blur(14px);
     display:none;min-width:195px;
     box-shadow:0 8px 32px rgba(0,0,0,.45);
+    transition:bottom .28s ease;
+    max-height:calc(100vh - 160px);
+    overflow-y:auto;
   }
   .legend-panel.open{display:block}
   .legend-title{
@@ -3418,6 +3421,7 @@
     const drawer = document.getElementById('infoDrawer');
     const ctrls = document.getElementById('mapCtrls');
     const legend = document.getElementById('legendBtn');
+    const legendPanel = document.getElementById('legendPanel');
     const atis = document.getElementById('atisToggleBtn');
     if (!drawer) return;
 
@@ -3425,12 +3429,15 @@
       // Measure the drawer height after it animates open
       const h = drawer.offsetHeight || 200;
       const offset = h + 14 + 'px';
+      const panelOffset = h + 112 + 'px'; // legend panel base 108px + same 4px shift as other controls
       if (ctrls) { ctrls.style.transition = 'bottom .28s ease'; ctrls.style.bottom = offset; }
       if (legend) { legend.style.transition = 'bottom .28s ease'; legend.style.bottom = offset; }
+      if (legendPanel) { legendPanel.style.transition = 'bottom .28s ease'; legendPanel.style.bottom = panelOffset; }
       if (atis)   { atis.style.transition = 'bottom .28s ease'; atis.style.bottom = (h + 62) + 'px'; }
     } else {
       if (ctrls) { ctrls.style.transition = 'bottom .28s ease'; ctrls.style.bottom = ''; }
       if (legend) { legend.style.transition = 'bottom .28s ease'; legend.style.bottom = ''; }
+      if (legendPanel) { legendPanel.style.transition = 'bottom .28s ease'; legendPanel.style.bottom = ''; }
       if (atis)   { atis.style.transition = 'bottom .28s ease'; atis.style.bottom = ''; }
     }
   }
