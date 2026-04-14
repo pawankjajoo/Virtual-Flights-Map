@@ -1,274 +1,175 @@
 # Virtual Flights Map
 
-A comprehensive 2D interactive map for real-time flight tracking across **ALL** major flight simulation platforms and virtual ATC networks.
+Live flight tracking map for VATSIM, IVAO, and POSCON virtual aviation networks. Real-time display of pilots, controllers, aircraft routes, weather, and navigational data across all major flight simulation platforms.
 
-## Overview
-
-Virtual Flights Map provides a unified interface for tracking pilots and air traffic controllers across multiple flight simulation communities simultaneously. Whether you fly on VATSIM, IVAO, POSCON, or other virtual flight simulation networks, this map consolidates all real-time traffic into one beautiful, responsive interface.
-
-## What's New (April 2026)
-
-### CORS Proxy & Cybersecurity Hardening
-- **Cloudflare Worker CORS Proxy**: All cross-origin API calls route through a dedicated Cloudflare Worker (`pss-cors-proxy`) ensuring the map works reliably inside Wix iframe embeds and across all deployment contexts
-- **Origin Allowlist**: The proxy validates requests against a strict allowlist of approved origins (`pushstartsims.com`, `maps.pushstartsims.com`, and Wix CDN domains) preventing unauthorized third-party usage
-- **Referer Verification**: Null-origin requests (common in iframes) are validated by checking the HTTP Referer header against `pushstartsims.com`, blocking abuse from unknown sites
-- **Circuit Breaker Pattern**: The resilient fetch engine (`pfetch`) implements a per-domain circuit breaker — after 3 consecutive failures, requests to that domain are paused for 60 seconds to avoid hammering failing endpoints
-- **Request Deduplication**: Identical concurrent requests are automatically deduplicated via an in-flight map, preventing redundant API calls
-
-### Day/Night Auto-Theming
-- **Automatic Theme Detection**: Map auto-selects dark or light theme based on user's local time (Day: 6:30 AM – 6:30 PM, Night: 6:30 PM – 6:30 AM)
-- **Dynamic Map Tiles**: Switches between CartoDB Dark and CartoDB Light tile layers to match the active theme
-- **Full UI Theming**: Complete dual color palette with CSS custom properties — every UI element (panels, buttons, text, markers) adapts to the active theme
-- **Manual Override**: Users can toggle day/night manually; preference is persisted in localStorage
-- **Theme-Aware Markers**: Aircraft labels and text shadows adjust for readability in both themes
-
-### API Call Efficiency for Concurrent Users
-- **Batch Endpoint**: Single `/batch` worker endpoint replaces 2–4 separate API requests per poll cycle, dramatically reducing request count
-- **Worker-Side Caching**: The Cloudflare Worker caches responses for 12 seconds — all concurrent users share the same cached data, meaning 30+ users generate the same load as 1 user
-- **Adaptive Polling Strategy**: Poll intervals adjust based on tab visibility (30s active, 60s idle, paused when hidden) to conserve bandwidth
-- **Flight-Phase-Aware Polling**: Ground/parked aircraft (< 10 kts) refresh at 120s intervals; airborne traffic at 30s — reducing unnecessary updates
-- **Smooth Aircraft Interpolation**: 30 FPS position interpolation between API polls using heading + groundspeed projection, so aircraft move smoothly without requiring faster polling
-- **Exponential Backoff Retries**: Failed requests retry with increasing delay, preventing thundering herd on transient errors
-- **Free-Plan Budget Optimized**: Engineered for ~2 requests/min per active user, supporting 30–35 concurrent users on Cloudflare's free tier (100k requests/day)
-
-### Domain Redirect Fix
-- **pushstartsim.com → pushstartsims.com**: Configured GoDaddy 301 permanent redirect so the domain without the "s" properly forwards over HTTPS to the main site
+**Author:** Pawan K Jajoo, Pushstart Simulators  
+**License:** MIT  
+**Repository:** Virtual-Flights-Map
 
 ## Features
 
-### Real-Time Flight Tracking
-- **Multi-Network Support**: Track flights from VATSIM, IVAO, POSCON, and other compatible networks — which means coverage of ALL online players from X-Plane (all editions), Microsoft Flight Simulator (all editions) and P3D Software
-- **Live Aircraft Markers**: See all active pilots with callsigns, positions, and headings
-- **ATC Coverage**: Interactive ATC stations showing active controllers worldwide
-- **Live Statistics**: Real-time pilot and controller counts with connection status
+### Live Traffic Networks
+- **Multi-network support:** VATSIM, IVAO, and POSCON pilots and ATC stations on single map
+- **Real-time data:** 30-second polling for VATSIM primary feed, 90-second secondary feed (IVAO + POSCON)
+- **Adaptive polling:** Flight phase detection adjusts refresh rates (ground: 120s, cruise: 30s)
+- **Smooth animation:** Aircraft interpolated at 60fps between API polls using heading and groundspeed
 
-### Interactive Controls
-- **Aircraft Search**: Find any flight by callsign, departure, or arrival airport
-- **Flight Information Panel**: Click any aircraft for detailed info (altitude, speed, heading, route, flight plan)
-- **Layer Toggles**: Show/hide aircraft, ATC stations, routes, weather overlays, navaids, airways, FIRs, SIGMETs
-- **Map Navigation**: Pan, zoom, and explore routes interactively
-- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
+### Map Layers (Toggleable)
+- **ATC Coverage:** Active air traffic control zones and facility data
+- **Flight Routes:** Parsed waypoint routes with great-circle arcs, color-coded (flown vs. remaining)
+- **Aircraft Markers:** Ground and prefiled aircraft with on-ground indicators
+- **Speed Vectors:** 4-minute projected position lines based on heading and groundspeed
+- **FIR/UIR Boundaries:** Flight Information Region and Upper Information Region airspace (VATSpy data)
+- **SIGMETs:** Significant meteorological advisories (aviation alerts)
+- **Navaids:** VOR, NDB, and fix markers with AIRAC navigation data
+- **Airway Centerlines:** High/low altitude routes between navaids
+- **Live Weather:** RainViewer radar overlay with METAR flight categories
 
-### Visual Features
-- **Day/Night Auto-Theme**: Automatically switches between dark cockpit and light daytime themes
-- **Aircraft Type Classification**: Color-coded markers across 7 categories (Heavy, Medium, Regional, Light Jet, GA, Helicopter, Military)
-- **Altitude-Aware Color Bands**: Marker colors shift based on flight level (GND/LOW/CLB/CRZ/HI/UHI)
-- **Dynamic Aircraft Sizing**: Marker size scales by aircraft category (Heavy: 14px, Medium: 11px, GA: 8px)
-- **ATC Circle Coverage**: Visual representation of controller coverage areas
-- **Smooth Animations**: 30 FPS aircraft interpolation with fluid UI transitions
+### Aircraft & ATC Data
+- **Pilot information:** Callsign, aircraft type, route, altitude, groundspeed, flight plan
+- **Controllers:** ATIS, Approach, Tower, Ground, Delivery frequencies and facility details
+- **Aircraft classification:** Heavy, Medium, Light Jet, Regional, General Aviation, Military, Helicopter
+- **Flight plan details:** Departure, arrival, route string, aircraft equipment, filed altitude/speed
+- **Logon times:** User connection timestamp across networks
+- **Network identification:** Explicit pilot/controller network tagging (VATSIM/IVAO/POSCON badges)
 
-### Live Weather System
-- **RainViewer Radar Overlay**: Real-time precipitation radar tiles with smooth rendering
-- **NOAA METAR Integration**: Aviation weather from the Aviation Weather Center covering global airports
-- **Flight Category Display**: VFR / MVFR / IFR / LIFR weather classification at airports
-- **Zoom-Level Filtering**: Low zoom shows only severe weather; high zoom reveals all categories
+### Search & Filtering
+- **Callsign search:** Find pilots and controllers by callsign with autocomplete
+- **Airport search:** Locate airports by ICAO code
+- **Aircraft type filter:** Show/hide by aircraft category (heavy, regional, GA, military, etc.)
+- **Real-time results:** Search index updated on every data poll
 
-### Advanced Capabilities
-- **Multi-Network Aggregation**: Phased fetch strategy — VATSIM every 30s, full network sweep (VATSIM + IVAO + POSCON) every 90s
-- **Resilient Fetch Engine**: Circuit breaker, retry with backoff, request deduplication, and 15-second abort timeouts
-- **ROI Tool Integration**: Region of Interest analysis tools for flight analysis
-- **Frequency Search**: Look up ATC frequencies and controller information
-- **Flight Plan Parsing**: Detailed routing and flight plan information
-- **ATIS Voice Integration**: Text-to-speech for ATIS information
+### Route Parsing & Navigation
+- **VOR/Fix resolution:** Multi-strategy waypoint lookup (static navaids â AIRAC CSV â GitHub JSON â OpenNav API)
+- **Ambiguity resolution:** Distance-weighted disambiguation for identically-named navaids across regions
+- **Great-circle routing:** Long segments (>400km) rendered with geodesic accuracy
+- **Route amendment detection:** Auto-reparse on flight plan change
+- **Fallback routing:** Dep â Current Position â Arrival when waypoint parsing fails
+- **Navaid caching:** localStorage persistence across sessions
 
-## Technical Stack
+### Weather Integration
+- **RainViewer radar:** Live precipitation and storm animation
+- **METAR parsing:** Aviation color categories (VFR green, MVFR blue, IFCR red, LIFR magenta)
+- **Weather timers:** 5-minute update cycle
+- **Airport weather display:** METAR data for selected airports
 
-### Frontend
-- **Leaflet.js v1.9.4**: Powerful open-source mapping library (free, no API key required)
-- **Custom Vector Tiles**: CartoDB Dark/Light with automatic theme switching
-- **Responsive CSS**: Mobile-first design with Flexbox and CSS Grid
-- **Modern JavaScript**: ES6+ with async/await for data fetching
+### ATIS Voice
+- **Text-to-speech:** Synthesized ATIS playback from selected ATC stations
+- **Real-time ATIS:** Live ATIS remarks from network data
+- **Voice control:** Browser Web Speech API integration with fallback
 
-### Styling
-- **Day/Night Dual Theme**: CSS custom properties for complete theme switching
-- **Inter & SF Mono**: Professional typography for clarity and readability
-- **Glassmorphism**: Backdrop blur effects for modern UI components
-- **Smooth Animations**: 0.15s–0.3s transitions for fluid interactions
+### User Interface
+- **Day/Night themes:** Auto-detection based on local time with manual override
+- **Dark cockpit aesthetic:** Professional aviation-style interface
+- **Responsive design:** Mobile-friendly layout with adaptive responsiveness
+- **Live statistics:** Header display of pilot count, ATC count, prefile count, live status
 
-### Data Integration
-- **VATSIM Network**: Real-time pilot, ATC, and transceiver data
-- **IVAO Network**: Normalized pilot and controller data
-- **POSCON Network**: Real-time pilot and ATC data
-- **CORS Proxy**: Cloudflare Worker with origin validation, caching, and batch support
-- **Real-Time Updates**: Adaptive 30s/60s/120s polling based on context
+### Developer Features
+- **Resilient fetch engine:** Automatic retry, circuit breaker per domain, request deduplication
+- **Adaptive API strategy:** Scraper-style escalation (HTTP â cloudscraper â Playwright)
+- **CORS proxy support:** Fallback for APIs lacking CORS headers (OpenNav, Aviation Weather)
+- **Network diagnostics:** Console logging for data fetch, parsing, route resolution
+- **Batch API endpoint:** Aggregated VATSIM + IVAO + POSCON in single 12-second cached call
 
-### Architecture
-- **100% Client-Side**: No backend server required
-- **Self-Contained**: Single HTML file with all assets
-- **No Build Process**: Drop and run — works with any static web server
-- **No External Dependencies**: All required libraries loaded via CDN
-- **Batch API Design**: Worker aggregates multiple network APIs into single response
+## How It Works
 
-## Getting Started
+### Data Sources
+1. **VATSIM:** `/api/v3/vatsim/pilots`, `/api/v3/vatsim/controllers`, `/status`
+2. **IVAO:** Whazzup v2 endpoint (`/clients.php`)
+3. **POSCON:** Online players JSON endpoint
 
-### Installation
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/pawankjajoo/Virtual-Flights-Map.git
-   cd Virtual-Flights-Map
-   ```
+### Normalization
+All pilot/controller objects normalized to common shape regardless of network source for seamless integration.
 
-2. **Open in Browser**:
-   - Simply open `index.html` in any modern web browser
-   - No server or build process required
-   - Works locally by opening the file directly
+### Route Parsing Pipeline
+1. Extract route string from flight plan
+2. Tokenize into VOR/NDB/fix identifiers
+3. Resolve each token through priority chain:
+   - Static navdata cache (localStorage)
+   - AIRAC CSV (GitHub)
+   - Navaid JSON (external source)
+   - Airport coordinates
+   - OpenNav API (live lookup)
+4. Disambiguate duplicates by distance-to-previous-point
+5. Filter unrealistic detours (>1.5x direct distance)
+6. Render as polyline with departure/arrival markers
 
-### Browser Requirements
-- Modern browser with ES6+ support (Chrome 51+, Firefox 55+, Safari 11+, Edge 79+)
-- JavaScript enabled
-- CORS support for API data fetching
-- Sufficient network bandwidth for real-time updates
+### Speed Vector Calculation
+- Bearing: true heading from flight plan or calculated from last two positions
+- Distance: groundspeed x 4 minutes / 3600
+- Projection: haversine formula forward calculation
 
-### No Configuration Needed
-The application works out-of-the-box with default settings optimized for performance and clarity. No API keys, authentication, or configuration files required.
+### Theme System
+- CSS variables for light/dark modes
+- Auto-switch 6:30 AM - 6:30 PM local time
+- localStorage persistence of user preference
+- Real-time map tile swapping (OpenStreetMap day/night)
 
-## Usage Guide
+## Map Controls
 
-### Basic Navigation
-- **Pan Map**: Click and drag to move around the map
-- **Zoom**: Scroll wheel to zoom in/out or use map controls
-- **Reset View**: Click the reset button to return to default view
+### Top-Right Zoom
+- **+** Zoom in
+- **â** Zoom out
+- **Reset** Return to fit-to-data bounds
 
-### Searching Flights
-1. Click the search box at the top of the screen
-2. Type a callsign (e.g., "DAL123"), departure or arrival airport
-3. Select from dropdown results (up to 8 matches)
-4. Map will automatically navigate to the selected flight
+### Layer Toggle Panel
+- **ATC** Air traffic control coverage zones
+- **RTE** Flight routes and waypoints
+- **GRND** On-ground / prefiled aircraft
+- **VEC** Speed vectors (4-minute projection)
+- **FIR** Flight information region boundaries
+- **SIG** SIGMET weather alerts
+- **NAV** Navaid markers (VOR/NDB/Fix)
+- **AWY** Airway centerlines
+- **WX** Live weather radar (RainViewer + METAR)
 
-### Viewing Flight Details
-1. Click any aircraft marker on the map
-2. Info drawer opens showing:
-   - **Flight Information**: Callsign, aircraft type, status
-   - **Position & Movement**: Latitude, longitude, altitude, heading, ground speed
-   - **Flight Plan**: Departure airport, arrival airport, cruise altitude, route
-   - **Remarks**: Special notes and flight information
+### Bottom-Left Controls
+- **ATIS** Play synthesized ATIS from selected controller
+- **KEY** Toggle aircraft type legend
 
-### Viewing ATC Information
-1. Click any ATC circle marker
-2. Controller details appear showing:
-   - **Frequency**: Active ATC frequency
-   - **Position**: Airport or airspace coverage
-   - **Controller Callsign**: ATC identifier
-   - **ATIS Information**: Voice readout of ATIS via text-to-speech
+### Top-Center Display
+- Virtual Pilots In-Flight (across all networks)
+- Active ATC count
+- VATSIM pre-flight / filed count
+- Live indicator
 
-### Layer Control
-Toggle visibility of different map elements:
-- **Aircraft Toggle**: Show/hide all flight markers
-- **ATC Toggle**: Show/hide controller coverage circles
-- **Routes Toggle**: Show/hide flight paths and routes
-- **Weather Toggle**: Overlay precipitation radar and METAR data
-- **Navaids / Airways / FIRs / SIGMETs**: Additional aviation overlays
+## Installation
 
-## Data Sources
+Single HTML file deployment. Serve over HTTPS with:
+- Leaflet 1.9.4+ (CDN loaded)
+- Modern browser (ES6+ support, Web Speech API)
+- No backend required (all APIs called from client)
 
-| Network | Source | Update Frequency |
-|---------|--------|------------------|
-| VATSIM | data.vatsim.net/v3/vatsim-data.json | Every 30s (primary) |
-| IVAO | api.ivao.aero/v2/tracker/whazzup | Every 90s (full sweep) |
-| POSCON | POSCON API endpoints | Every 90s (full sweep) |
-| Weather | RainViewer + NOAA AWC | On demand |
+## Responsive Design
 
-**Rate Limiting**: Conservative polling with adaptive intervals to stay within API limits and Cloudflare free-tier budget.
+- Desktop: Full feature set with all layers and controls
+- Tablet: Optimized layout, collapsible panels
+- Mobile (<480px): Condensed stats, search-first UI
+
+## Browser Support
+
+- Chrome/Edge 90+
+- Firefox 88+
+- Safari 14+
+- Modern mobile browsers
+
+## Notes
+
+- Aircraft interpolated between 30s polls for smooth animation
+- Circuit breaker auto-silences APIs after 3 consecutive failures (60s reset)
+- CORS proxy required for: opennav.com, aviationweather.gov
+- METAR data cached across poll cycles to reduce API load
+- FIR/SIGMET layers load on-demand (single fetch per session)
+
+## Keyboard Shortcuts
+
+- **D** Toggle day/night theme
+- **K** Toggle aircraft legend
+- **S** Focus search box
 
 ## Performance
 
-- **Optimized for 30–35 concurrent users** on Cloudflare free tier via batch caching
-- **Smooth 30 FPS interpolation**: Aircraft positions animate between API polls
-- **Real-time Updates**: Adaptive 30s–120s refresh based on flight phase and tab visibility
-- **Responsive**: Works smoothly on mobile devices and low-bandwidth connections
-- **Bundle Size**: ~234 KB single HTML file with embedded CSS/JS
-
-## Security
-
-- **CORS Proxy Origin Allowlist**: Only approved origins can use the proxy
-- **Referer Validation**: Null-origin iframe requests verified via Referer header
-- **Circuit Breaker Protection**: Prevents cascading failures from hammering failing APIs
-- **No Backend**: All data processing client-side, no sensitive data transmission
-- **No Credentials**: Anonymous public API access only
-- **Content Security Policy Compatible**: Can be hosted in CSP-restricted environments
-
-## Browser Compatibility
-
-| Browser | Minimum Version | Status |
-|---------|-----------------|--------|
-| Chrome | 51+ | ✓ Full Support |
-| Firefox | 55+ | ✓ Full Support |
-| Safari | 11+ | ✓ Full Support |
-| Edge | 79+ | ✓ Full Support |
-| Opera | 38+ | ✓ Full Support |
-| IE 11 | — | ✗ Not Supported |
-
-## Deployment
-
-### Static Web Server
-```bash
-# Copy files to any static web server
-# Apache, Nginx, GitHub Pages, Vercel, Netlify all work
-
-# Example with Python
-python -m http.server 8000
-# Then open http://localhost:8000/index.html
-```
-
-### Direct File Opening
-```bash
-open index.html          # macOS
-start index.html         # Windows
-xdg-open index.html      # Linux
-```
-
-### Wix Embed
-The map is designed to work inside Wix HTML embed iframes via the CORS proxy. Embed `index.html` on any Wix page and it will function out of the box.
-
-## Customization
-
-### Theme Customization
-The application uses CSS custom properties with full day/night palettes. Edit these in the `<style>` section:
-```css
-:root[data-theme="night"] {
-  --bg: #090d18;         /* Dark background */
-  --acc: #22d3ee;        /* Cyan accent */
-  --grn: #34d399;        /* Active/success */
-}
-:root[data-theme="day"] {
-  --bg: #f0f4f8;         /* Light background */
-  --acc: #0891b2;        /* Teal accent */
-  --grn: #059669;        /* Active/success */
-}
-```
-
-### Configuration
-Internal configuration values are defined in JavaScript:
-- `POLL_ACTIVE`: Data refresh when tab active (default: 30000ms)
-- `POLL_IDLE`: Data refresh when idle (default: 60000ms)
-- `CORS_PROXY`: CORS proxy URL for API calls
-- Networks: VATSIM, IVAO, POSCON all enabled by default
-
-## Contributing
-
-Contributions welcome! Areas for enhancement:
-- Additional flight simulation network adapters
-- Weather overlay improvements
-- Flight trail visualization
-- 3D terrain rendering
-- Performance optimizations
-- Mobile UI improvements
-
-## License
-
-MIT License — Developed by Pawan K Jajoo | Pushstart Simulators
-
-## Support & Community
-
-- For issues and feature requests, open an issue on GitHub
-- Join flight simulation communities on VATSIM, IVAO, or POSCON
-- Share feedback and suggestions for improvements
-
-## Version History
-
-- **v1.1** (April 2026): CORS proxy cybersecurity hardening, day/night auto-theming, batch API optimization for concurrent users, domain redirect fix, live weather integration, aircraft interpolation engine
-- **v1.0** (March 2026): Initial release with Leaflet.js mapping, multi-network tracking, live ATC, flight search, responsive design
-
----
-
-**Made with ❤️ for the virtual aviation community** | Pushstart Simulators
+- Canvas-based rendering via Leaflet
+- Layer clustering for 500+ aircraft
+- Deduped API requests (inflight map)
+- LocalStorage caching for navaids and preferences
