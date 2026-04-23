@@ -5,15 +5,15 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>Virtual Flights Map | Pushstart Simulators</title>
-<meta name="description" content="Live virtual flights map showing real-time traffic from VATSIM, IVAO & POSCON virtual ATC networks. Track pilots, controllers, routes and weather worldwide.">
-<meta name="keywords" content="virtual flights map, VATSIM, IVAO, POSCON, flight simulator, virtual ATC, live traffic, Pushstart Simulators">
+<meta name="description" content="Live virtual flights map showing real-time traffic from VATSIM, IVAO, POSCON & SayIntentions.AI/Skynet virtual ATC networks. Track pilots, controllers, routes and weather worldwide.">
+<meta name="keywords" content="virtual flights map, VATSIM, IVAO, POSCON, SayIntentions, Skynet, flight simulator, virtual ATC, live traffic, Pushstart Simulators">
 <meta property="og:title" content="Virtual Flights Map | Pushstart Simulators">
-<meta property="og:description" content="Live virtual flights map showing real-time traffic from VATSIM, IVAO & POSCON virtual ATC networks.">
+<meta property="og:description" content="Live virtual flights map showing real-time traffic from VATSIM, IVAO, POSCON & SayIntentions.AI/Skynet networks.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://maps.pushstartsims.com">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Virtual Flights Map | Pushstart Simulators">
-<meta name="twitter:description" content="Live virtual flights map showing real-time traffic from VATSIM, IVAO & POSCON virtual ATC networks.">
+<meta name="twitter:description" content="Live virtual flights map showing real-time traffic from VATSIM, IVAO, POSCON & SayIntentions.AI/Skynet networks.">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -860,7 +860,7 @@
   </div>
 </div>
 
-<div id="app" title="Virtual Flights Map — VATSIM + IVAO + POSCON">
+<div id="app" title="Virtual Flights Map — VATSIM + IVAO + POSCON + SayIntentions/Skynet">
 
   <!-- ═══ HEADER ═══ -->
   <div class="header">
@@ -1214,7 +1214,7 @@
       <div class="welcome-overlay" id="welcomeOverlay">
         <div class="welcome-box">
           <h2>@PushStartSims - Virtual Flights Map</h2>
-          <div class="welcome-sub">Live traffic from V.A.T.S.I.M., IVAO &amp; POSCON Virtual ATC Networks</div>
+          <div class="welcome-sub">Live traffic from V.A.T.S.I.M., IVAO, POSCON &amp; SayIntentions.AI / Skynet Networks</div>
 
           <h3>Aircraft Icons</h3>
           <div class="wf-row">
@@ -1291,11 +1291,25 @@
     </div>
   </div>
 
+  <!-- ═══ NETWORK HEALTH ALERT BANNER ═══ -->
+  <div id="netHealthAlert" style="display:none;position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(15,23,42,0.95);border:1px solid rgba(239,68,68,0.5);border-radius:10px;padding:12px 20px;max-width:520px;width:90%;font-family:Inter,system-ui,sans-serif;font-size:12px;color:#e2e8f0;box-shadow:0 8px 32px rgba(0,0,0,0.5);backdrop-filter:blur(12px);">
+    <div style="display:flex;align-items:flex-start;gap:10px;">
+      <span style="color:#ef4444;font-size:16px;line-height:1;">&#9888;</span>
+      <div style="flex:1;">
+        <div style="font-weight:600;margin-bottom:4px;color:#fbbf24;">Network Data Issue</div>
+        <div id="netHealthMsg" style="line-height:1.5;"></div>
+      </div>
+      <button id="netHealthDismiss" style="background:none;border:1px solid rgba(148,163,184,0.3);border-radius:6px;color:#94a3b8;cursor:pointer;padding:4px 10px;font-size:11px;white-space:nowrap;font-family:inherit;" onclick="document.getElementById('netHealthAlert').style.display='none';window._netAlertDismissed=true;">Dismiss</button>
+    </div>
+  </div>
+
   <!-- ═══ FOOTER ═══ -->
   <div class="footer">
     <div class="upd ok" id="updBadge"><span>●</span> <span id="updTxt">Connecting…</span></div>
-    <div style="display:flex;align-items:center;gap:8px;font-size:9px;color:rgba(148,163,184,0.7);">
+    <div style="display:flex;align-items:center;gap:8px;font-size:9px;color:rgba(148,163,184,0.7);flex-wrap:wrap;justify-content:center;">
       <span>&copy; 2026 Pushstart LLC</span>
+      <span style="opacity:0.4;">|</span>
+      <span>Data: <a href="https://vatsim.net" target="_blank" rel="noopener" style="color:rgba(96,165,250,0.8);text-decoration:none;">VATSIM</a> · <a href="https://ivao.aero" target="_blank" rel="noopener" style="color:rgba(96,165,250,0.8);text-decoration:none;">IVAO</a> · <a href="https://poscon.net" target="_blank" rel="noopener" style="color:rgba(96,165,250,0.8);text-decoration:none;">POSCON</a> · <a href="https://sayintentions.ai" target="_blank" rel="noopener" style="color:rgba(96,165,250,0.8);text-decoration:none;">SayIntentions.AI</a></span>
       <span style="opacity:0.4;">|</span>
       <a href="https://pushstartsims.com/privacy-policy" target="_blank" rel="noopener" style="color:rgba(96,165,250,0.8);text-decoration:underline;text-underline-offset:2px;">Privacy</a>
       <span style="opacity:0.4;">|</span>
@@ -1319,6 +1333,7 @@
   // The batch endpoint aggregates VATSIM+IVAO+POSCON into one cached call (12s TTL).
   const CORS_PROXY = 'https://pss-cors-proxy.pushstartsims-com.workers.dev/?url=';
   const BATCH_URL  = 'https://pss-cors-proxy.pushstartsims-com.workers.dev/batch';
+  const SAYINT_URL = 'https://lambda.sayintentions.ai/tracker/map';
 
   // ═══ INTERPOLATION ENGINE ═══
   // Smoothly moves aircraft between API polls using heading + groundspeed.
@@ -1672,6 +1687,16 @@
   // ── MULTI-NETWORK STATE ──
   let ivaoData=null;   // IVAO whazzup v2 response
   let posconData=null;  // POSCON online.json response
+  let sayintData=null;  // SayIntentions.AI / Skynet tracker response
+
+  // ── NETWORK HEALTH TRACKING ──
+  const _netHealth = {
+    VATSIM:  { ok: false, lastErr: null },
+    IVAO:    { ok: false, lastErr: null },
+    POSCON:  { ok: false, lastErr: null },
+    SAYINT:  { ok: false, lastErr: null },
+  };
+  let _netAlertDismissed = false;
 
   // ── IVAO PILOT NORMALIZER ──
   // Converts an IVAO pilot object into the same shape as a VATSIM pilot object
@@ -1801,8 +1826,48 @@
     };
   }
 
-  // ── MERGED PILOT LIST (VATSIM + IVAO + POSCON) ──
-  // Combines all active pilots from three networks into a single array
+  // ── SAYINTENTIONS / SKYNET PILOT NORMALIZER ──
+  function normalizeSayIntentionsPilot(f){
+    if(f.lat==null||f.lon==null) return null;
+    if(f.lat===0 && f.lon===0) return null;
+    if(f.paused) return null;
+    const acIcao = f.aircraft_icao || '';
+    const acType = f.aircraft_type || '';
+    return {
+      callsign:     f.tail_number || f.displayname || '',
+      name:         f.displayname ? 'SI:'+f.displayname : '',
+      latitude:     f.lat,
+      longitude:    f.lon,
+      altitude:     f.altitude || 0,
+      groundspeed:  f.airspeed || 0,
+      heading:      f.heading  || 0,
+      transponder:  f.assigned_transponder ? String(f.assigned_transponder).padStart(4,'0') : '1200',
+      qnh_mb:       null,
+      qnh_i_hg:     null,
+      logon_time:   null,
+      pilot_rating: 0,
+      server:       'SayIntentions',
+      _network:     'SAYINT',
+      flight_plan:{
+        departure:    f.origin || f.flight_plan_origin || '',
+        arrival:      f.final_destination || f.flight_plan_destination || '',
+        alternate:    '',
+        aircraft_short: acIcao,
+        aircraft:     acIcao || acType,
+        flight_rules: f.flight_rules || 'V',
+        altitude:     '',
+        cruise_tas:   '',
+        deptime:      '',
+        enroute_time: '',
+        fuel_time:    '',
+        remarks:      f.flight_plan || '',
+        route:        f.flight_plan_route || '',
+      },
+    };
+  }
+
+  // ── MERGED PILOT LIST (VATSIM + IVAO + POSCON + SAYINTENTIONS) ──
+  // Combines all active pilots from four networks into a single array
   function getAllPilots(){
     // VATSIM pilots — tag if not already tagged, else assume VATSIM
     const vPilots = data
@@ -1817,8 +1882,12 @@
     const pPilots = posconData
       ? (posconData.flights||[]).map(normalizePOSCONPilot).filter(Boolean)
       : [];
+    // SayIntentions / Skynet pilots
+    const sPilots = sayintData
+      ? sayintData.map(normalizeSayIntentionsPilot).filter(Boolean)
+      : [];
     // Merge all networks
-    let all = [...vPilots,...iPilots,...pPilots];
+    let all = [...vPilots,...iPilots,...pPilots,...sPilots];
     // Apply aircraft type filter if active
     if (acTypeFilterVal) {
       all = all.filter(p => {
@@ -2984,9 +3053,38 @@
       // ── IVAO + POSCON (secondary, from batch) ──
       if(doSecondary){
         _lastSecondaryFetch = now;
-        if(batch.ivao) ivaoData = batch.ivao;
-        if(batch.poscon) posconData = batch.poscon;
+        if(batch.ivao){ ivaoData = batch.ivao; _netHealth.IVAO.ok=true; _netHealth.IVAO.lastErr=null; }
+        else { _netHealth.IVAO.ok=false; _netHealth.IVAO.lastErr='No data in batch'; }
+        if(batch.poscon){ posconData = batch.poscon; _netHealth.POSCON.ok=true; _netHealth.POSCON.lastErr=null; }
+        else { _netHealth.POSCON.ok=false; _netHealth.POSCON.lastErr='No data in batch'; }
       }
+
+      // ── SAYINTENTIONS / SKYNET (direct fetch, independent of batch) ──
+      if(doSecondary){
+        try{
+          let siResp;
+          try{
+            siResp = await fetch(SAYINT_URL, { cache: 'no-store' });
+          }catch(directErr){
+            console.warn('[SI] Direct fetch failed, trying CORS proxy');
+            siResp = await fetch(CORS_PROXY + encodeURIComponent(SAYINT_URL), { cache: 'no-store' });
+          }
+          if(!siResp.ok) throw new Error('HTTP ' + siResp.status);
+          const siArr = await siResp.json();
+          if(Array.isArray(siArr)){
+            sayintData = siArr;
+            _netHealth.SAYINT.ok = true;
+            _netHealth.SAYINT.lastErr = null;
+          } else { throw new Error('Unexpected response shape'); }
+        }catch(siErr){
+          console.warn('[SI] SayIntentions fetch failed:', siErr.message);
+          _netHealth.SAYINT.ok = false;
+          _netHealth.SAYINT.lastErr = siErr.message;
+        }
+      }
+
+      // ── Network health: mark VATSIM OK ──
+      _netHealth.VATSIM.ok = true; _netHealth.VATSIM.lastErr = null;
 
       // ── Feed interpolation engine with fresh positions ──
       const allPilots = getAllPilots();
@@ -3028,8 +3126,12 @@
       }
       firstDataLoaded=true;
       hideLoader();
+      showNetHealthAlert();
+
     } catch(e){
       console.error('Data fetch:',e);
+      _netHealth.VATSIM.ok = false; _netHealth.VATSIM.lastErr = e.message;
+      showNetHealthAlert();
       const badge=document.getElementById('updBadge');
       if(badge) badge.className='upd stale';
       const txt=document.getElementById('updTxt');
@@ -3068,12 +3170,39 @@
 
     const badge=document.getElementById('updBadge');
     badge.className='upd ok';
-    const nets=['VATSIM',ivaoData?'IVAO':null,posconData?'POSCON':null].filter(Boolean).join('+');
-    document.getElementById('updTxt').textContent=nets+' · '+lastUpd.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const netEntries = [
+      { key:'VATSIM',  label:'VATSIM',  hasData:!!data },
+      { key:'IVAO',    label:'IVAO',    hasData:!!ivaoData },
+      { key:'POSCON',  label:'POSCON',  hasData:!!posconData },
+      { key:'SAYINT',  label:'SKYNET', hasData:!!sayintData },
+    ];
+    const netsHtml = netEntries.map(n => {
+      const ok = _netHealth[n.key] && _netHealth[n.key].ok;
+      if(!n.hasData && !ok) return `<span style="color:#ef4444;font-weight:700" title="${n.label}: ${(_netHealth[n.key]||{}).lastErr||'no data'}">${n.label}</span>`;
+      if(n.hasData) return `<span style="color:#4ade80">${n.label}</span>`;
+      return null;
+    }).filter(Boolean).join('+');
+    document.getElementById('updTxt').innerHTML=netsHtml+' \xb7 '+lastUpd.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});
 
     // Only re-render panel list if it's actually open (avoid interfering with tab selection)
     const panel=document.getElementById('sidePanel');
     if(panel && panel.classList.contains('open')) renderList();
+  }
+
+  // ── Network health alert ──
+  function showNetHealthAlert(){
+    if(_netAlertDismissed) return;
+    const el = document.getElementById('netHealthAlert');
+    const msgEl = document.getElementById('netHealthMsg');
+    if(!el || !msgEl) return;
+    const NET_LABELS = { VATSIM:'VATSIM', IVAO:'IVAO', POSCON:'POSCON', SAYINT:'SKYNET' };
+    const failed = Object.entries(_netHealth)
+      .filter(([,v]) => !v.ok)
+      .map(([k,v]) => `<span style="color:#ef4444;font-weight:600">${NET_LABELS[k]||k}</span>${v.lastErr ? ' ('+v.lastErr+')' : ''}`);
+    if(failed.length === 0){ el.style.display = 'none'; return; }
+    msgEl.innerHTML = 'Unable to load data from: ' + failed.join(', ') +
+      '.<br><span style="color:#94a3b8;">Other networks are still displaying. Data will retry automatically.</span>';
+    el.style.display = 'block';
   }
 
   // ═══ LEAFLET MAP ═══
@@ -3318,9 +3447,10 @@
 
   // Network badge colours (only shown for non-VATSIM networks to keep UI clean)
   const NET_BADGE={
-    IVAO:    {bg:'#f59e0b',fg:'#000'},
-    POSCON:  {bg:'#818cf8',fg:'#fff'},
-    DEFAULT: {bg:'#64748b',fg:'#fff'},
+    IVAO:    {bg:'#f59e0b',fg:'#000',label:'IVAO'},
+    POSCON:  {bg:'#818cf8',fg:'#fff',label:'POSCON'},
+    SAYINT:  {bg:'#10b981',fg:'#fff',label:'SKYNET'},
+    DEFAULT: {bg:'#64748b',fg:'#fff',label:'?'},
   };
 
   function updateMap(){
@@ -3360,7 +3490,7 @@
       // Network badge (only rendered for non-VATSIM sources)
       const nb = net!=='VATSIM' ? (NET_BADGE[net]||NET_BADGE.DEFAULT) : null;
       const netBadgeHtml = nb
-        ? `<span style="background:${nb.bg};color:${nb.fg};font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:5px;vertical-align:middle">${esc(net)}</span>`
+        ? `<span style="background:${nb.bg};color:${nb.fg};font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:5px;vertical-align:middle">${esc(nb.label||net)}</span>`
         : '';
       m.bindTooltip(
         `<strong style="color:var(--acc)">${esc(p.callsign)}</strong>${netBadgeHtml}${typeCode?` <span style="color:var(--t2);font-size:9px">${esc(typeCode)}</span>`:''}
@@ -3429,7 +3559,7 @@
       // Measure the drawer height after it animates open
       const h = drawer.offsetHeight || 200;
       const offset = h + 14 + 'px';
-      const panelOffset = h + 112 + 'px'; // legend panel base 108px + same 4px shift as other controls
+      const panelOffset = h + 112 + 'px';
       if (ctrls) { ctrls.style.transition = 'bottom .28s ease'; ctrls.style.bottom = offset; }
       if (legend) { legend.style.transition = 'bottom .28s ease'; legend.style.bottom = offset; }
       if (legendPanel) { legendPanel.style.transition = 'bottom .28s ease'; legendPanel.style.bottom = panelOffset; }
@@ -3532,12 +3662,12 @@
     ];
 
     const badge = fp.aircraft_short || null;
-    const netLabel = p._network && p._network!=='VATSIM' ? ` · ${p._network}` : '';
+    const netLabel = p._network && p._network!=='VATSIM' ? ` · ${(NET_BADGE[p._network]||{}).label||p._network}` : '';
     // Show aircraft category label (Helicopter, Light Jet, GA, etc.)
     const catLabels={heavy:'Heavy',medium:'Airliner',lightjet:'Light Jet',regional:'Regional',ga:'Gen. Aviation',helicopter:'Helicopter',military:'Military'};
     const catCode = acCategory(fp.aircraft_short||fp.aircraft||'');
     const catTag = catLabels[catCode]||'';
-    const typeStr = p.name ? `${esc(p.name)}${netLabel}${catTag?' · '+catTag:''}` : ((p._network||'VATSIM')+(catTag?' · '+catTag:''));
+    const typeStr = p.name ? `${esc(p.name)}${netLabel}${catTag?' · '+catTag:''}` : (((NET_BADGE[p._network]||{}).label||p._network||'VATSIM')+(catTag?' · '+catTag:''));
     openDrawer(p.callsign, badge, typeStr, tabs);
   }
 
@@ -4684,7 +4814,7 @@
       list.innerHTML=atc.map(c=>{
         const fName=(facilityMap[c.facility]||{}).short||(c._network||'');
         const fColor=({1:'#a78bfa',2:'#fb923c',3:'#4ade80',4:'#facc15',5:'#22d3ee',6:'#818cf8'})[c.facility]
-          ||(c._network==='IVAO'?'#f59e0b':c._network==='POSCON'?'#818cf8':'#94a3b8');
+          ||(c._network==='IVAO'?'#f59e0b':c._network==='POSCON'?'#818cf8':c._network==='SAYINT'?'#10b981':'#94a3b8');
         const online=fmtOnline(c.logon_time);
         const atisCode=c.atis_code?` ${c.atis_code}`:'';
         const nb=c._network&&c._network!=='VATSIM'?(NET_BADGE[c._network]||NET_BADGE.DEFAULT):null;
